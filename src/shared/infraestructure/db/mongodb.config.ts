@@ -1,7 +1,8 @@
 import mongoose from 'mongoose';
-const DB_PASSWORD = '';
-const DB_USERNAME = '';
-const MONGOATLAS_URL: string = `mongodb+srv://devmart-api:${DB_PASSWORD}@cluster0.97mongr.mongodb.net/?appName=Cluster0`;
+import { env } from 'process';
+const DB_PASSWORD = env.DB_PASSWORD;
+const DB_USERNAME = env.DB_USERNAME;
+const MONGOATLAS_URL: string = `mongodb+srv://${DB_USERNAME}:${DB_PASSWORD}@cluster0.97mongr.mongodb.net/?appName=Cluster0`;
 
 const DB_NAME: string = '';
 
