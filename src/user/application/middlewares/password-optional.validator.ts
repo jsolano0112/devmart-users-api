@@ -1,5 +1,5 @@
 import { body } from 'express-validator';
-import { validateResult } from '../../../../../../devmart-api/src/shared/helpers/validate.helper';
+import { validateResult } from '../../../shared/helpers/validate.helper';
 
 export const validateOptionalPassword = [
   body('password')

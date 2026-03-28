@@ -1,6 +1,6 @@
-import { Exception } from '../../../../../../devmart-api/src/shared/helpers/exception-message';
-import { RepositoryContainer } from '../../../../../../devmart-api/src/shared/infraestructure/respository-container';
-import { IUserResponse } from '../../../../../../devmart-api/src/shared/interfaces/users';
+import { Exception } from "../../../shared/helpers/exception-message";
+import { RepositoryContainer } from "../../../shared/infraestructure/respository-container";
+import { IUserResponse } from "../../../shared/interfaces/users";
 
 export class GetUserById {
   constructor(private repo: RepositoryContainer) {}

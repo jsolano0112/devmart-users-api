@@ -1,11 +1,11 @@
 import { Router } from 'express';
 import { validateUserInfo } from '../middlewares/user.validator';
 import { validateAuthentication } from '../middlewares/authenticate-user.validator';
-import { verifyAuthToken } from '../../../../../../devmart-api/src/shared/helpers/jwt-validator';
 import { UserController } from '../controller/users.controller';
-import { validateIdNumberParameter } from '../../../../../../devmart-api/src/shared/helpers/get-id-number.validator';
 import { validateOptionalPassword } from '../middlewares/password-optional.validator';
 import { validateMandatoryPassword } from '../middlewares/password-mandatory.validator';
+import { validateIdNumberParameter } from '../../../shared/helpers/get-id-number.validator';
+import { verifyAuthToken } from '../../../shared/helpers/jwt-validator';
 const controller = new UserController();
 const userRouter: Router = Router();
 const authRouter: Router = Router();

@@ -1,4 +1,4 @@
-import { IUpdateUser, IUser } from '../../../../../../devmart-api/src/shared/interfaces/users';
+import { IUpdateUser, IUser } from '../../../shared/interfaces/users';
 import { User } from '../models/user.schema';
 
 export class UserRepository {

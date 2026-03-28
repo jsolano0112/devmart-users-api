@@ -1,6 +1,6 @@
 import { connection, model, Schema } from 'mongoose';
-import { IUser } from '../../../../../../devmart-api/src/shared/interfaces/users';
 import AutoIncrementFactory from 'mongoose-sequence';
+import { IUser } from '../../../shared/interfaces/users';
 
 const AutoIncrement = AutoIncrementFactory(connection);
 

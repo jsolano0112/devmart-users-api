@@ -1,8 +1,8 @@
-import { validateEmailDomain } from '../../../../../../devmart-api/src/shared/helpers/email-domain.validator';
-import { Exception } from '../../../../../../devmart-api/src/shared/helpers/exception-message';
-import { RepositoryContainer } from '../../../../../../devmart-api/src/shared/infraestructure/respository-container';
-import { IUpdateUser } from '../../../../../../devmart-api/src/shared/interfaces/users';
+
 import bcrypt from 'bcryptjs';
+import { RepositoryContainer } from '../../../shared/infraestructure/respository-container';
+import { IUpdateUser } from '../../../shared/interfaces/users';
+import { Exception } from '../../../shared/helpers/exception-message';
 
 export class UpdateUser {
   constructor(private repo: RepositoryContainer) {}
@@ -13,7 +13,7 @@ export class UpdateUser {
     if (dbUser.email !== user.email) {
       const existingUser = await this.repo.users.getUserByEmail(user.email);
       if (existingUser) throw new Exception('The user already exists.', 409);
-      await validateEmailDomain(user.email);
+      // await validateEmailDomain(user.email);
     }
 
     if (user.password != '' && user.password != null) {

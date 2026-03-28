@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import { UserServiceContainer } from '../../infraestructure/user-service-container';
-import { IUser, IUserCredentials } from '../../../../../../devmart-api/src/shared/interfaces/users';
+import { IUser, IUserCredentials } from '../../../shared/interfaces/users';
 
 export class UserController {
   public async getById(

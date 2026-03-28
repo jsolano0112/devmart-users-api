@@ -1,10 +1,7 @@
-import { Exception } from '../../../../../../devmart-api/src/shared/helpers/exception-message';
-import {
-  generateToken,
-  verifyRefreshToken,
-} from '../../../../../../devmart-api/src/shared/infraestructure/auth/jwt-service';
-import { RepositoryContainer } from '../../../../../../devmart-api/src/shared/infraestructure/respository-container';
-import { IUserCredentialsResponse } from '../../../../../../devmart-api/src/shared/interfaces/users';
+import { Exception } from "../../../shared/helpers/exception-message";
+import { generateToken, verifyRefreshToken } from "../../../shared/infraestructure/auth/jwt-service";
+import { RepositoryContainer } from "../../../shared/infraestructure/respository-container";
+import { IUserCredentialsResponse } from "../../../shared/interfaces/users";
 
 export class RefreshToken {
   constructor(private repo: RepositoryContainer) {}

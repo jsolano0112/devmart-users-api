@@ -1,4 +1,4 @@
-import { RepositoryContainer } from '../../../../../devmart-api/src/shared/infraestructure/respository-container';
+import { RepositoryContainer } from '../../shared/infraestructure/respository-container';
 import { AuthenticateUser } from '../application/use-cases/authenticate-user.use.case';
 import { CreateUser } from '../application/use-cases/create-user.use-case';
 import { GetUserById } from '../application/use-cases/get-user.use.case';

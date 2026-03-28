@@ -1,11 +1,9 @@
-import { RepositoryContainer } from '../../../../../../devmart-api/src/shared/infraestructure/respository-container';
-import {
-  IUserCredentials,
-  IUserCredentialsResponse,
-} from '../../../../../../devmart-api/src/shared/interfaces/users';
-import { generateToken } from '../../../../../../devmart-api/src/shared/infraestructure/auth/jwt-service';
-import { Exception } from '../../../../../../devmart-api/src/shared/helpers/exception-message';
+
 import bcrypt from 'bcryptjs';
+import { RepositoryContainer } from '../../../shared/infraestructure/respository-container';
+import { Exception } from '../../../shared/helpers/exception-message';
+import { IUserCredentials, IUserCredentialsResponse } from '../../../shared/interfaces/users';
+import { generateToken } from '../../../shared/infraestructure/auth/jwt-service';
 
 export class AuthenticateUser {
   private MAX_ATTEMPTS = 3;
