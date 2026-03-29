@@ -1,7 +1,13 @@
+import bcrypt from 'bcryptjs';
 import { User } from '../../domain/models/user.schema';
+
+const SEED_PLAIN_PASSWORD = '123456Aa*';
 
 export const seedUsers = async () => {
   console.log('🌱 Initializing user seeders...');
+
+  const salt = await bcrypt.genSalt(10);
+  const hashedPassword = await bcrypt.hash(SEED_PLAIN_PASSWORD, salt);
 
   const users = [
     {
@@ -14,7 +20,7 @@ export const seedUsers = async () => {
       city: 'Springfield',
       zipCode: 110111,
       isActive: true,
-      password: 'hashed_password_123',
+      password: hashedPassword,
       isAdmin: true,
       failedLoginAttempts: 0,
       lockUntil: null,
@@ -29,7 +35,7 @@ export const seedUsers = async () => {
       city: 'Medellín',
       zipCode: 50010,
       isActive: true,
-      password: 'hashed_password_123',
+      password: hashedPassword,
       isAdmin: false,
       failedLoginAttempts: 0,
       lockUntil: null,
@@ -44,7 +50,7 @@ export const seedUsers = async () => {
       city: 'Bogotá',
       zipCode: 110231,
       isActive: false,
-      password: 'hashed_password_123',
+      password: hashedPassword,
       isAdmin: false,
       failedLoginAttempts: 1,
       lockUntil: null,
