@@ -4,6 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
+    "seed": "ts-node src/shared/infraestructure/seeders/seeders.service.ts",
     "start": "ts-node-dev --respawn --transpile-only src/app.ts"
   },
   "keywords": [],
