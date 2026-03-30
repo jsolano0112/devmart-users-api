@@ -2,7 +2,7 @@ import { OrderStatus } from './order-status';
 
 export interface IOrderResponse {
   id: number;
-  userId: number;
+  userId: any;
   products: IProduct[];
   paymentMethod: number;
   total: number;
@@ -14,7 +14,7 @@ export interface IOrderResponse {
 
 export interface IUserOrderResponse {
   id: number;
-  userId: number;
+  userId: any;
   count: number;
   total: number;
   createdAt: Date;
@@ -24,7 +24,7 @@ export interface IUserOrderResponse {
 
 export interface IOrder {
   id: number;
-  userId: number;
+  userId: any;
   products: IProduct[];
   paymentMethod: number;
   address: string;
