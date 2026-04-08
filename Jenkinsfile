@@ -3,12 +3,10 @@ pipeline {
 
     environment {
         IMAGE_NAME = 'users-api'
-        CONTAINER_NAME = 'users-api'
-        PORT = '3001'
     }
 
     stages {
-        stage('Install Dependencies') {
+        stage('Instalar Dependencias') {
             steps {
                 echo 'Instalando dependencias...'
                 script {
@@ -21,7 +19,7 @@ pipeline {
             }
         }
 
-        stage('Build Docker Image') {
+        stage('Construir Imagen Docker') {
             steps {
                 echo 'Construyendo imagen Docker...'
                 script {
@@ -33,43 +31,14 @@ pipeline {
                 }
             }
         }
-
-        stage('Deploy') {
-            steps {
-                echo 'Desplegando contenedor de users api...'
-                script {
-                    if (isUnix()) {
-                        sh "docker stop ${CONTAINER_NAME} || true"
-                        sh "docker rm ${CONTAINER_NAME} || true"
-                        sh """
-                            docker run -d \\
-                                --name ${CONTAINER_NAME} \\
-                                --env-file .env \\
-                                -p ${PORT}:${PORT} \\
-                                ${IMAGE_NAME}:latest
-                        """
-                    } else {
-                        bat "docker stop %CONTAINER_NAME% || exit 0"
-                        bat "docker rm %CONTAINER_NAME% || exit 0"
-                        bat """
-                            docker run -d ^
-                                --name %CONTAINER_NAME% ^
-                                --env-file .env ^
-                                -p %PORT%:%PORT% ^
-                                %IMAGE_NAME%:latest
-                        """
-                    }
-                }
-            }
-        }
     }
 
     post {
         success {
-            echo 'USERS API desplegado correctamente'
+            echo 'Imagen users-api construida correctamente'
         }
         failure {
-            echo 'USERS API: Error en el pipeline'
+            echo 'Error al construir la imagen'
         }
     }
 }
