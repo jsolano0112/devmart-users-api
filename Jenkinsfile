@@ -36,7 +36,7 @@ pipeline {
 
         stage('Deploy') {
             steps {
-                echo 'Desplegando contenedor...'
+                echo 'Desplegando contenedor de users api...'
                 script {
                     if (isUnix()) {
                         sh "docker stop ${CONTAINER_NAME} || true"
