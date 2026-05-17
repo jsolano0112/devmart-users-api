@@ -2,65 +2,61 @@ pipeline {
     agent any
 
     environment {
-        IMAGE_NAME = 'users-api'
-        COMPOSE_DIR = 'C:\\Users\\LENOVO\\Desktop\\electiva 3'
+        IMAGE_NAME = "jsolano0112/users-api"
     }
 
     stages {
-        stage('Instalar Dependencias') {
+
+        stage('Build') {
             steps {
-                echo 'Instalando dependencias...'
-                script {
-                    if (isUnix()) {
-                        sh 'npm install'
-                    } else {
-                        bat 'npm install'
-                    }
+                withCredentials([
+                    string(credentialsId: 'jwt-secret',          variable: 'JWT_SECRET'),
+                    string(credentialsId: 'jwt-refresh-secret',  variable: 'JWT_REFRESH_SECRET'),
+                    string(credentialsId: 'mongo-db-username',   variable: 'DB_USERNAME'),
+                    string(credentialsId: 'mongo-db-password',   variable: 'DB_PASSWORD'),
+                ]) {
+                    sh """
+                        docker build \
+                        --build-arg JWT_SECRET=$JWT_SECRET \
+                        --build-arg JWT_REFRESH_SECRET=$JWT_REFRESH_SECRET \
+                        --build-arg JWT_EXPIRE_IN=15m \
+                        --build-arg JWT_REFRESH_EXPIRE_IN=20m \
+                        --build-arg DB_USERNAME=$DB_USERNAME \
+                        --build-arg DB_PASSWORD=$DB_PASSWORD \
+                        -t ${IMAGE_NAME}:${BUILD_NUMBER} \
+                        -t ${IMAGE_NAME}:latest \
+                        .
+                    """
                 }
             }
         }
 
-        stage('Construir Imagen Docker') {
+        stage('Push a DockerHub') {
             steps {
-                echo 'Construyendo imagen users-api...'
-                script {
-                    if (isUnix()) {
-                        sh "docker build -t ${IMAGE_NAME}:latest ."
-                    } else {
-                        bat "docker build -t %IMAGE_NAME%:latest ."
-                    }
+                withCredentials([usernamePassword(
+                    credentialsId: 'dockerhub-credentials',
+                    usernameVariable: 'DOCKER_USER',
+                    passwordVariable: 'DOCKER_PASS'
+                )]) {
+                    sh """
+                        echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin
+                        docker push ${IMAGE_NAME}:${BUILD_NUMBER}
+                        docker push ${IMAGE_NAME}:latest
+                        docker logout
+                    """
                 }
             }
         }
 
-        // ← faltaba el stage de despliegue completo
-        stage('Desplegar Contenedores') {
+        stage('Limpiar') {
             steps {
-                echo 'Desplegando users-api-1 y users-api-2...'
-                script {
-                    if (isUnix()) {
-                        sh """
-                            cd "${COMPOSE_DIR}"
-                            docker compose --env-file ./users/.env up -d --no-deps --force-recreate \
-                                users-api-1 users-api-2
-                        """
-                    } else {
-                        bat """
-                            cd "%COMPOSE_DIR%"
-                            docker compose --env-file ./users/.env up -d --no-deps --force-recreate users-api-1 users-api-2
-                        """
-                    }
-                }
+                sh "docker rmi ${IMAGE_NAME}:${BUILD_NUMBER} || true"
             }
         }
     }
 
     post {
-        success {
-            echo 'users-api desplegado correctamente en ambas instancias'
-        }
-        failure {
-            echo 'Error al desplegar users-api'
-        }
+        success { echo "✅ ${IMAGE_NAME}:${BUILD_NUMBER} publicado en DockerHub" }
+        failure { echo "❌ Falló el pipeline" }
     }
 }

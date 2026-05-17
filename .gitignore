@@ -1,2 +1,5 @@
 node_modules/
 src/shared/infraestructure/db/mongodb.config.ts
+.env
+.env.*
+!.env.example
