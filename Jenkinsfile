@@ -2,11 +2,10 @@ pipeline {
     agent any
 
     environment {
-        IMAGE_NAME = "jsolano0112/users-api"
+        IMAGE_NAME = 'jsolano0112/users-api'
     }
 
     stages {
-
         stage('Build') {
             steps {
                 withCredentials([
@@ -15,7 +14,7 @@ pipeline {
                     string(credentialsId: 'mongo-db-username',  variable: 'DB_USERNAME'),
                     string(credentialsId: 'mongo-db-password',  variable: 'DB_PASSWORD')
                 ]) {
-                    bat """
+                    bat '''
                         docker build ^
                         --build-arg JWT_SECRET=%JWT_SECRET% ^
                         --build-arg JWT_REFRESH_SECRET=%JWT_REFRESH_SECRET% ^
@@ -26,7 +25,7 @@ pipeline {
                         -t %IMAGE_NAME%:%BUILD_NUMBER% ^
                         -t %IMAGE_NAME%:latest ^
                         .
-                    """
+                    '''
                 }
             }
         }
@@ -34,29 +33,29 @@ pipeline {
         stage('Push a DockerHub') {
             steps {
                 withCredentials([usernamePassword(
-                    credentialsId: 'dockerhub-credentials',
-                    usernameVariable: 'DOCKER_USER',
-                    passwordVariable: 'DOCKER_PASS'
-                )]) {
-                    bat """
-                        echo %DOCKER_PASS% | docker login -u %DOCKER_USER% --password-stdin
-                        docker push %IMAGE_NAME%:%BUILD_NUMBER%
-                        docker push %IMAGE_NAME%:latest
-                        docker logout
-                    """
-                }
+            credentialsId: 'dockerhub-credentials',
+            usernameVariable: 'DOCKER_USER',
+            passwordVariable: 'DOCKER_PASS'
+        )]) {
+                    bat '''
+                echo %DOCKER_PASS% | docker login -u %DOCKER_USER% --password-stdin || exit /b 1
+                docker push %IMAGE_NAME%:%BUILD_NUMBER% || exit /b 1
+                docker push %IMAGE_NAME%:latest || exit /b 1
+                docker logout
+            '''
+        }
             }
         }
 
         stage('Limpiar') {
             steps {
-                bat "docker rmi %IMAGE_NAME%:%BUILD_NUMBER% || true"
+                bat 'docker rmi %IMAGE_NAME%:%BUILD_NUMBER% || true'
             }
         }
     }
 
     post {
-        success { echo "✅ %IMAGE_NAME%:%BUILD_NUMBER% publicado en DockerHub" }
-        failure { echo "❌ Falló el pipeline" }
+        success { echo '✅ %IMAGE_NAME%:%BUILD_NUMBER% publicado en DockerHub' }
+        failure { echo '❌ Falló el pipeline' }
     }
 }
