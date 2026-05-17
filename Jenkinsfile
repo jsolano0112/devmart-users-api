@@ -2,39 +2,54 @@ pipeline {
     agent any
 
     environment {
-        IMAGE_NAME        = 'users-api'
-        COMPOSE_SERVICES  = 'users-api-1 users-api-2'
-        REMOTE_DEPLOY_DIR = '/opt/devmart'
-        COMPOSE_FILE      = 'docker-compose.prod.yml'
-        DEVMART_EC2_HOST  = credentials('DEVMART_EC2_HOST')
-    }
-
-    triggers {
-        githubPush()
+        IMAGE_NAME = 'users-api'
+        COMPOSE_DIR = 'C:\\Users\\LENOVO\\Desktop\\electiva 3'
     }
 
     stages {
-        stage('Instalar dependencias') {
+        stage('Instalar Dependencias') {
             steps {
-                bat 'npm ci || npm install'
+                echo 'Instalando dependencias...'
+                script {
+                    if (isUnix()) {
+                        sh 'npm install'
+                    } else {
+                        bat 'npm install'
+                    }
+                }
             }
         }
 
-        stage('Construir imagen Docker') {
+        stage('Construir Imagen Docker') {
             steps {
-                bat 'docker build -t %IMAGE_NAME%:latest .'
+                echo 'Construyendo imagen users-api...'
+                script {
+                    if (isUnix()) {
+                        sh "docker build -t ${IMAGE_NAME}:latest ."
+                    } else {
+                        bat "docker build -t %IMAGE_NAME%:latest ."
+                    }
+                }
             }
         }
 
-        stage('Desplegar en EC2') {
+        // ← faltaba el stage de despliegue completo
+        stage('Desplegar Contenedores') {
             steps {
-                sshagent(credentials: ['DEVMART_EC2_SSH']) {
-                    bat '''
-                        docker save %IMAGE_NAME%:latest -o image.tar
-                        scp -o StrictHostKeyChecking=no image.tar ubuntu@%DEVMART_EC2_HOST%:/tmp/%IMAGE_NAME%.tar
-                        ssh -o StrictHostKeyChecking=no ubuntu@%DEVMART_EC2_HOST% "docker load -i /tmp/%IMAGE_NAME%.tar && rm -f /tmp/%IMAGE_NAME%.tar"
-                        ssh -o StrictHostKeyChecking=no ubuntu@%DEVMART_EC2_HOST% "cd %REMOTE_DEPLOY_DIR% && docker compose -f %COMPOSE_FILE% up -d --no-deps %COMPOSE_SERVICES%"
-                    '''
+                echo 'Desplegando users-api-1 y users-api-2...'
+                script {
+                    if (isUnix()) {
+                        sh """
+                            cd "${COMPOSE_DIR}"
+                            docker compose --env-file ./users/.env up -d --no-deps --force-recreate \
+                                users-api-1 users-api-2
+                        """
+                    } else {
+                        bat """
+                            cd "%COMPOSE_DIR%"
+                            docker compose --env-file ./users/.env up -d --no-deps --force-recreate users-api-1 users-api-2
+                        """
+                    }
                 }
             }
         }
@@ -42,10 +57,10 @@ pipeline {
 
     post {
         success {
-            echo 'users-api desplegado en EC2.'
+            echo 'users-api desplegado correctamente en ambas instancias'
         }
         failure {
-            echo 'Error en pipeline users-api.'
+            echo 'Error al desplegar users-api'
         }
     }
 }
