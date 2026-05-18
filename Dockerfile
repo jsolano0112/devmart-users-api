@@ -4,4 +4,4 @@ COPY package*.json ./
 RUN npm install
 COPY . .
 EXPOSE 3001
-CMD ["npx", "ts-node", "src/app.ts"]
+CMD ["npx", "ts-node", "--transpile-only", "src/app.ts"]
