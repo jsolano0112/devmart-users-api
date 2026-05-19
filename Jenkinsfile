@@ -53,18 +53,20 @@ pipeline {
             }
         }
 
-        stage('Deploy en EC2') {
+       stage('Deploy en EC2') {
             steps {
-                withCredentials([
+                    withCredentials([
                     string(credentialsId: 'devmart-ec2-ip', variable: 'EC2_IP'),
                     sshUserPrivateKey(
                         credentialsId: 'devmart-ssh-key',
                         keyFileVariable: 'SSH_KEY'
                     )
                 ]) {
-                    bat """
+                    bat '''
+                        icacls "%SSH_KEY%" /inheritance:r
+                        icacls "%SSH_KEY%" /grant:r "%USERNAME%:R"
                         ssh -o StrictHostKeyChecking=no -i "%SSH_KEY%" ubuntu@%EC2_IP% "cd /home/ubuntu/devmart-infra && docker-compose pull users-api-1 && docker-compose up -d users-api-1"
-                    """
+                    '''
                 }
             }
         }
