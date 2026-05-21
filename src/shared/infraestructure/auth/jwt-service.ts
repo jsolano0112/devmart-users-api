@@ -1,34 +1,54 @@
 import jwt from 'jsonwebtoken';
-import 'dotenv/config';
+import env from '../../../../src/config';
 import { Exception } from '../../helpers/exception-message';
 import { ITokens, JWTPayload } from '../../interfaces/jwt';
 
-//TODO: REVIEW LATER, SAVE TOKEN IN COOKIES IN THE FRONTEND
+// ================= ENV =================
 
-const JWT_SECRET = process.env.JWT_SECRET;
-const JWT_EXPIRE_IN = process.env.JWT_EXPIRE_IN;
-const JWT_REFRESH_SECRET = process.env.JWT_REFRESH_SECRET;
-const JWT_REFRESH_EXPIRE_IN = process.env.JWT_REFRESH_EXPIRE_IN;
+const JWT_SECRET = env.jwtSecret;
+const JWT_EXPIRE_IN = env.jwtExpireIn;
+const JWT_REFRESH_SECRET = env.jwtRefreshSecret;
+const JWT_REFRESH_EXPIRE_IN = env.jwtRefreshExpireIn;
+
+// ================= VALIDATIONS =================
+
+if (!JWT_SECRET) {
+  throw new Error('JWT_SECRET is not defined');
+}
+
+if (!JWT_REFRESH_SECRET) {
+  throw new Error('JWT_REFRESH_SECRET is not defined');
+}
+
+// ================= GENERATE TOKENS =================
 
 export const generateToken = (payload: JWTPayload): ITokens => {
   try {
     const { exp, iat, ...cleanPayload } = payload;
 
-    const accessToken = jwt.sign(cleanPayload, JWT_SECRET!, {
+    const accessToken = jwt.sign(cleanPayload, JWT_SECRET, {
       algorithm: 'HS256',
-      expiresIn: JWT_EXPIRE_IN,
+      expiresIn: JWT_EXPIRE_IN as jwt.SignOptions['expiresIn'],
     });
 
-    const refreshToken = jwt.sign(cleanPayload, JWT_REFRESH_SECRET!, {
+    const refreshToken = jwt.sign(cleanPayload, JWT_REFRESH_SECRET, {
       algorithm: 'HS256',
-      expiresIn: JWT_REFRESH_EXPIRE_IN,
+      expiresIn: JWT_REFRESH_EXPIRE_IN as jwt.SignOptions['expiresIn'],
     });
 
-    return { accessToken, refreshToken };
+    return {
+      accessToken,
+      refreshToken,
+    };
   } catch (error) {
-    throw new Exception('By generate token has ocurred error: ' + error, 401);
+    throw new Exception(
+      'By generate token has ocurred error: ' + error,
+      401,
+    );
   }
 };
+
+// ================= VERIFY ACCESS TOKEN =================
 
 export const verifyAccessToken = (token: string): JWTPayload => {
   try {
@@ -38,13 +58,21 @@ export const verifyAccessToken = (token: string): JWTPayload => {
   } catch (error) {
     if (error instanceof jwt.TokenExpiredError) {
       throw new Exception('Token expired.', 401);
-    } else if (error instanceof jwt.JsonWebTokenError) {
-      throw new Exception('Invalid Token.', 401);
-    } else {
-      throw new Exception('By verify token has ocurred error: ' + error, 401);
     }
+
+    if (error instanceof jwt.JsonWebTokenError) {
+      throw new Exception('Invalid Token.', 401);
+    }
+
+    throw new Exception(
+      'By verify token has ocurred error: ' + error,
+      401,
+    );
   }
 };
+
+// ================= VERIFY REFRESH TOKEN =================
+
 export const verifyRefreshToken = (token: string): JWTPayload => {
   try {
     return jwt.verify(token, JWT_REFRESH_SECRET, {
@@ -53,10 +81,15 @@ export const verifyRefreshToken = (token: string): JWTPayload => {
   } catch (error) {
     if (error instanceof jwt.TokenExpiredError) {
       throw new Exception('Token expired.', 401);
-    } else if (error instanceof jwt.JsonWebTokenError) {
-      throw new Exception('Invalid Token.', 401);
-    } else {
-      throw new Exception('By verify token has ocurred error: ' + error, 401);
     }
+
+    if (error instanceof jwt.JsonWebTokenError) {
+      throw new Exception('Invalid Token.', 401);
+    }
+
+    throw new Exception(
+      'By verify token has ocurred error: ' + error,
+      401,
+    );
   }
 };

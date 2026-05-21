@@ -5,7 +5,9 @@
   "main": "index.js",
   "scripts": {
     "seed": "ts-node src/shared/infraestructure/seeders/seeders.service.ts",
-    "start": "ts-node-dev --respawn --transpile-only src/app.ts"
+    "start": "ts-node-dev --respawn --transpile-only src/app.ts",
+    "qa": "set NODE_ENV=qa&& ts-node-dev --respawn --transpile-only src/app.ts",
+    "prod": "set NODE_ENV=production&& node dist/app.js"
   },
   "keywords": [],
   "author": "",
