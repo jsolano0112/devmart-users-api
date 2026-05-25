@@ -1,3 +1,32 @@
+def resolveDeployTarget() {
+    def explicit = env.DEPLOY_ENV?.trim()?.toLowerCase()
+    if (explicit in ['qa', 'prod']) {
+        return explicit
+    }
+
+    def branch = env.BRANCH_NAME?.trim()
+    if (!branch && env.GIT_BRANCH) {
+        branch = env.GIT_BRANCH.replaceFirst(/^origin\//, '').trim()
+    }
+
+    if (branch == 'main') {
+        return 'prod'
+    }
+    if (branch in ['qa', 'develop']) {
+        return 'qa'
+    }
+
+    def job = env.JOB_NAME?.toLowerCase() ?: ''
+    if (job.contains('prod')) {
+        return 'prod'
+    }
+    if (job.contains('qa')) {
+        return 'qa'
+    }
+
+    error("No se pudo determinar qa/prod. DEPLOY_ENV=${env.DEPLOY_ENV}, BRANCH_NAME=${env.BRANCH_NAME}, GIT_BRANCH=${env.GIT_BRANCH}, JOB_NAME=${env.JOB_NAME}")
+}
+
 pipeline {
 
     agent any
@@ -7,6 +36,15 @@ pipeline {
     }
 
     stages {
+
+        stage('Setup') {
+            steps {
+                script {
+                    env.DEPLOY_TARGET = resolveDeployTarget()
+                    echo "Entorno detectado: ${env.DEPLOY_TARGET}"
+                }
+            }
+        }
 
         stage('Build') {
             steps {
@@ -47,21 +85,22 @@ pipeline {
             }
         }
 
-        stage('Aprobación PROD') {
+        stage('Aprobacion PROD') {
             when {
-                branch 'main'
+                expression { env.DEPLOY_TARGET == 'prod' }
             }
             steps {
-                input message: '¿Confirmas deploy de users-api en PROD?', ok: 'Sí, deployar'
+                input message: 'Confirmas deploy de users-api en PROD?', ok: 'Si, deployar'
             }
         }
 
         stage('Deploy') {
             steps {
                 script {
-                    def EC2_IP_CREDENTIAL  = env.BRANCH_NAME == 'main' ? 'prod-ec2-ip'          : 'qa-ec2-ip'
-                    def SSH_KEY_CREDENTIAL = env.BRANCH_NAME == 'main' ? 'devmart-ssh-key-prod'  : 'devmart-ssh-key-qa'
-                    def INFRA_BRANCH         = env.BRANCH_NAME == 'main' ? 'main'    : 'develop'
+                    def isProd             = env.DEPLOY_TARGET == 'prod'
+                    def EC2_IP_CREDENTIAL  = isProd ? 'prod-ec2-ip'          : 'qa-ec2-ip'
+                    def SSH_KEY_CREDENTIAL = isProd ? 'devmart-ssh-key-prod'  : 'devmart-ssh-key-qa'
+                    def INFRA_BRANCH       = isProd ? 'main'    : 'develop'
 
                     withCredentials([
                         string(credentialsId: EC2_IP_CREDENTIAL, variable: 'EC2_IP'),
@@ -83,7 +122,7 @@ pipeline {
     }
 
     post {
-        success { echo "✅ users-api desplegado en ${env.BRANCH_NAME == 'main' ? 'PROD' : 'QA'}" }
-        failure { echo '❌ Falló el pipeline de users-api' }
+        success { echo "users-api desplegado en ${env.DEPLOY_TARGET == 'prod' ? 'PROD' : 'QA'}" }
+        failure { echo 'Fallo el pipeline de users-api' }
     }
 }
